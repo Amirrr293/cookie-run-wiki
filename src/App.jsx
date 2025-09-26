@@ -921,7 +921,15 @@ export default function App() {
   useEffect(() => {
     try {
         if (typeof __firebase_config !== 'undefined') {
-            const firebaseConfig = JSON.parse(__firebase_config);
+            const firebaseConfig = {
+              apiKey: "AIzaSyDnjjsRZGQlcmF69WWU_9kve8SIe9KhURE",
+              authDomain: "cookie-run-wiki.firebaseapp.com",
+              projectId: "cookie-run-wiki",
+              storageBucket: "cookie-run-wiki.firebasestorage.app",
+              messagingSenderId: "274447145748",
+              appId: "1:274447145748:web:a45c06c5e8560680414001",
+              measurementId: "G-WHJYPJ1V9Q"
+            };
             const app = initializeApp(firebaseConfig);
             const firestoreDb = getFirestore(app);
             const firebaseAuth = getAuth(app);
