@@ -150,23 +150,7 @@ const SidebarButton = ({ icon, text, onClick, buttonView, currentView, isSidebar
     );
 };
 
-const CookieCard = ({ cookie, onCardClick, getAttributeImageUrl }) => {
-    return (
-      <div
-        onClick={onCardClick}
-        className="group relative aspect-square overflow-hidden cursor-pointer"
-      >
-        <img src={proxifyUrl(cookie.avatarUrl) || `https://placehold.co/200x200/cccccc/000000?text=Avatar`} alt={`${cookie.name} avatar`} className="w-full h-full object-cover rounded-2xl" />
-        <div className="absolute bottom-0 left-0 right-0 p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <h3 className="text-xl font-bold text-white text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] leading-tight" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.9)'}}>{cookie.name}</h3>
-        </div>
-        {getAttributeImageUrl('role', cookie.role) && <img src={proxifyUrl(getAttributeImageUrl('role', cookie.role))} alt={cookie.role} className="absolute top-3 left-3 w-10 h-10 p-1 object-contain drop-shadow-lg" />}
-        {getAttributeImageUrl('position', cookie.position) && <img src={proxifyUrl(getAttributeImageUrl('position', cookie.position))} alt={cookie.position} className="absolute top-3 right-3 w-12 h-8 p-1 object-contain drop-shadow-lg" />}
-      </div>
-    );
-};
-
-const RaritySection = ({ rarityName, items, collapsedRarities, setCollapsedRarities, getAttributeImageUrl, onCardClick, CardComponent, itemType }) => {
+const RaritySection = ({ rarityName, items, collapsedRarities, setCollapsedRarities, getAttributeImageUrl, onCardClick, itemType }) => {
     const isCollapsed = collapsedRarities[rarityName];
 
     return (
@@ -180,16 +164,15 @@ const RaritySection = ({ rarityName, items, collapsedRarities, setCollapsedRarit
             </div>
             {!isCollapsed && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-8">
-                    {items.map((item) => (
-                        <CardComponent
-                            key={item.id || `${item.cookie.id}-${item.name}`}
-                            cookie={itemType === 'cookie' ? item : undefined}
-                            costume={itemType === 'costume' ? item : undefined}
-                            powerUp={itemType === 'powerup' ? item : undefined}
-                            onCardClick={() => onCardClick(item)}
-                            getAttributeImageUrl={getAttributeImageUrl}
-                        />
-                    ))}
+                    {items.map((item) => {
+                        if (itemType === 'cookie') {
+                            return <CookieCard key={item.id} cookie={item} onCardClick={() => onCardClick(item)} getAttributeImageUrl={getAttributeImageUrl} />
+                        }
+                        if (itemType === 'costume') {
+                            return <CostumeCard key={`${item.cookie.id}-${item.name}`} costume={item} onCardClick={() => onCardClick(item)} getAttributeImageUrl={getAttributeImageUrl} />
+                        }
+                        return null;
+                    })}
                 </div>
             )}
         </div>
@@ -236,7 +219,6 @@ const CookieListView = ({ searchTerm, setSearchTerm, sort, onSort, groupedCookie
                     setCollapsedRarities={setCollapsedRarities}
                     getAttributeImageUrl={getAttributeImageUrl}
                     onCardClick={(item) => onCardClick('detail', item)}
-                    CardComponent={CookieCard}
                     itemType="cookie"
                 />
             ))
@@ -614,7 +596,7 @@ function CostumeManagerView({ cookies, getAttributeImageUrl, onCostumeClick, att
     return (
         <div>
             <header className="mb-10 text-center"><h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg">Cookie Costumes</h1><div className="flex flex-col md:flex-row justify-center items-center mt-6 gap-4"><div className="relative w-full md:w-auto"><input type="text" placeholder="Search for a costume or cookie..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full md:w-96 bg-slate-800/70 text-white placeholder-white placeholder-opacity-60 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]" /><div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Icon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" className="w-5 h-5 text-white opacity-60" /></div></div><div className="flex items-center gap-2"><span className="text-sm font-semibold text-white">Sort:</span><div className="flex items-center bg-slate-800/70 rounded-full shadow-lg p-1"><SortButton option="rarity" text="Rarity" currentSort={sort} onSort={handleSort} /><div className="w-px h-5 bg-slate-600"></div><SortButton option="costumeName" text="Costume" currentSort={sort} onSort={handleSort} /><div className="w-px h-5 bg-slate-600"></div><SortButton option="cookieName" text="Cookie" currentSort={sort} onSort={handleSort} /></div></div></div></header>
-            <div className="space-y-10">{sort.option === 'rarity' ? (Object.entries(groupedCostumes).map(([rarityName, costumes]) => (<RaritySection key={rarityName} rarityName={rarityName} items={costumes} collapsedRarities={collapsedRarities} setCollapsedRarities={setCollapsedRarities} getAttributeImageUrl={getAttributeImageUrl} onCardClick={onCostumeClick} CardComponent={CostumeCard} itemType="costume" />))) : (<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-8">{sortedCostumes.map((costume) => (<CostumeCard key={`${costume.cookie.id}-${costume.name}`} costume={costume} onCardClick={() => onCostumeClick(costume)} getAttributeImageUrl={getAttributeImageUrl} />))}</div>)}</div>
+            <div className="space-y-10">{sort.option === 'rarity' ? (Object.entries(groupedCostumes).map(([rarityName, costumes]) => (<RaritySection key={rarityName} rarityName={rarityName} items={costumes} collapsedRarities={collapsedRarities} setCollapsedRarities={setCollapsedRarities} getAttributeImageUrl={getAttributeImageUrl} onCardClick={onCostumeClick} itemType="costume" />))) : (<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-8">{sortedCostumes.map((costume) => (<CostumeCard key={`${costume.cookie.id}-${costume.name}`} costume={costume} onCardClick={() => onCostumeClick(costume)} getAttributeImageUrl={getAttributeImageUrl} />))}</div>)}</div>
         </div>
     );
 }
@@ -1274,4 +1256,3 @@ export default function App() {
     </div>
   );
 }
-
