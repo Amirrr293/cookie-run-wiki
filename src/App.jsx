@@ -1,3 +1,4 @@
+/* global ColorThief, __app_id, __firebase_config, __initial_auth_token */
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
@@ -653,12 +654,11 @@ function CostumeForm({ costume, onSave, onCancel, attributes }) {
 }
 
 // --- Power-up Components ---
-function PowerUpManagerView({ powerUps, cookies, attributes, onCardClick, openModal }) {
+function PowerUpManagerView({ powerUps, cookies, attributes, onCardClick }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [sort, setSort] = useState({ option: 'name', direction: 'asc' });
 
     const enrichedPowerUps = useMemo(() => {
-        const cookieMap = new Map(cookies.map(c => [c.id, c]));
         return powerUps.map(p => ({
             ...p,
             cookie: cookies.find(c => c.powerUpId === p.id)
@@ -1100,7 +1100,9 @@ export default function App() {
       const costumeIndex = existingCostumes.findIndex(c => c.name === costumeData.originalName);
 
       let updatedCostumes;
-      const { originalName, ...restOfCostumeData } = costumeData;
+      const restOfCostumeData = { ...costumeData };
+      delete restOfCostumeData.originalName;
+
       if (costumeIndex > -1) {
           updatedCostumes = [...existingCostumes];
           updatedCostumes[costumeIndex] = restOfCostumeData;
@@ -1217,7 +1219,7 @@ export default function App() {
         case 'costumes':
             return <CostumeManagerView cookies={cookies} getAttributeImageUrl={getAttributeImageUrl} onCostumeClick={(costume) => openModal('costumeDetail', costume)} attributes={attributes} />;
         case 'powerups':
-            return <PowerUpManagerView powerUps={powerUps} cookies={cookies} attributes={attributes} onCardClick={openModal} openModal={openModal} />
+            return <PowerUpManagerView powerUps={powerUps} cookies={cookies} attributes={attributes} onCardClick={openModal} />
         case 'tierlist':
             return <TierListView cookies={cookies} tierLists={tierLists} onSave={handleSaveTierList} attributes={attributes} openModal={openModal} />
         default:
